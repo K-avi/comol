@@ -11,3 +11,16 @@ COMOL design :
 COMOL implementation :
 
     not really started tbh
+
+write getLine()
+
+test getLine()
+
+put lines in their own file; 
+
+I just thought and the array of Lines doesn't have to be dynamic bc the number of lines is NOT 
+something that will change 
+I just need to initialise it at start n then keep it updated
+
+
+maybe i should store capa in 0 n 1 index the bitch cuz lines start at fucking 1 

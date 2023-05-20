@@ -1,0 +1,55 @@
+I wanna do something silly w COMOL: 
+
+it's primitive types should be music oriented. 
+You dont have regular integers, floats lists etc 
+
+the default type for numbers is "note" which stores values from 0 to 12. 
+if you initialize a note w an integer i outside of 0 - 12 , it's value will be converted to i mod 12
+
+a note is written as an integer , possibly with a - 
+
+the COMOL "equivalent" of a list could either be a dodecaphonic serie or just a list of notes I'm not sure yet
+-> either ways the default list type can only contain notes which is beyond silly
+
+they would be written with 
+
+the equivalent of a set would be a PITCH class set / Scale which means sets can't contain more than 
+12 elements and that they can only contain notes
+
+written in between { }
+
+there should be special chord types with their custom syntax. 
+the language should recognise chord degree notation as a primitive type 
+like Imaj is treated kinda like a number is treated and evaluates to a chord 
+
+the other chord type should be normal chord notation. 
+for exemple Cmaj7add11 should be evaluated to the PCS {}
+
+
+types to fit :
+
+chords should be primitive type ; this is so stupid I love it
+chordprogs 
+
+interval vector 
+
+interval structure good question
+
+12-tone matrix hmmm
+
+those two will be straightforward ; nothing special about them
+not having strings could have been funny but they are not replaced by anything so I'll let em be
+strings 
+boolean
+
+stdlib : 
+
+-> I/O 
+-> O to MIDI 
+-> "normal" types
+    -> numbers
+    -> list, set, map/dict
+-> advanced types 
+    -> queues / stack 
+    -> heaps 
+    -> table ? 

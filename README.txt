@@ -16,4 +16,8 @@ The goal of it is to make operations with these objects as easy as possible.
 COMOL will also support basic types such as integer, floats, lists, and maybe more advanced ones such
 as maps. 
 
-I'm designing COMOL while reading the book so I'm not sure to how it will look at the moment . 
+I'm designing COMOL while reading the book so I'm not sure to how it will look at the moment. 
+I also don't really know if I should write COMOL while reading the book or just follow it and come back later and so on
+
+
+PS: COMOL will be very different from the Lox language, at least in the types it support

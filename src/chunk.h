@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "value.h"
+#include "lines.h"
 #include <sys/types.h>
 
 
@@ -12,18 +13,21 @@ typedef enum {
 } OpCode;
 
 
+
+
 typedef struct {
 
-  u_int32_t count;
-  u_int32_t capacity;
+  uint32_t count;
+  uint32_t capacity;
   uint8_t* code;
-  int* lines;
+  
+  Lines* lineCounter;
   ValueArray constants;
 } Chunk;
 
-void initChunk(Chunk* chunk);
+void initChunk(Chunk* chunk, uint32_t line_num);
 void freeChunk(Chunk* chunk);
-void writeChunk(Chunk* chunk, uint8_t byte, int line) ;
+void writeChunk(Chunk* chunk, uint8_t byte, uint32_t line) ;
 int addConstant(Chunk* chunk, Value value);
 
 #endif

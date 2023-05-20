@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include "lines.h"
 #include "value.h"
 #include "debug.h"
 
@@ -26,12 +27,10 @@ static int constantInstruction(const char* name, Chunk* chunk,
 
 int disassembleInstruction(Chunk* chunk, int offset) {
   printf("%04d ", offset);
-  if (offset > 0 &&
-      chunk->lines[offset] == chunk->lines[offset - 1]) {
-    printf("   | ");
-  } else {
-    printf("%4d ", chunk->lines[offset]);
-  }
+  
+  printf("%4d ", getLine(chunk->lineCounter,offset+1));
+  
+  
   uint8_t instruction = chunk->code[offset];
   switch (instruction) {
     case OP_RETURN:

@@ -1,48 +1,84 @@
 #include "chunk.h"
+#include "lines.h"
 #include "memory.h"
 
+#include <stdint.h>
 #include <stdlib.h>
+#include <sys/types.h>
 
 
-void initChunk(Chunk* chunk) {
+void initChunk(Chunk* chunk, u_int32_t line_num) {
    /*
+   function from book ; modified for the lines stuff
    */
   if(!chunk) return;
 
   chunk->count = 0;
   chunk->capacity = 0;
-  chunk->lines = NULL;
   chunk->code = NULL;
+  
+  chunk->lineCounter= (Lines* )malloc(sizeof(Lines));
+  
+  //to prevent reading from unititialised values
+  chunk->lineCounter->lines=NULL; 
+  chunk->lineCounter->capacity= 0;
+
+  initLines(chunk->lineCounter, line_num);
+  
   initValueArray(&chunk->constants);
 }
 
-void writeChunk(Chunk* chunk, uint8_t byte, int line)  {
+void writeChunk(Chunk* chunk, uint8_t byte, uint32_t instruct_line)  {
   /*
+  function from book; edited to 
+  include exercise from chapter 14; 
   */
+  
   if(!chunk) return;
-
+  
   if (chunk->capacity < chunk->count + 1) {
     int oldCapacity = chunk->capacity;
     chunk->capacity = GROW_CAPACITY(oldCapacity);
     chunk->code = GROW_ARRAY(uint8_t, chunk->code, oldCapacity, chunk->capacity);
-    chunk->lines = GROW_ARRAY(int, chunk->lines,oldCapacity, chunk->capacity);
+   
   }
 
   chunk->code[chunk->count] = byte;
-  chunk->lines[chunk->count] = line;
   chunk->count++;
-}
+
+  addLine(chunk->lineCounter, instruct_line);
+
+}// not tested
 
 int addConstant(Chunk* chunk, Value value) {
+  /*
+  function from book
+  */
   writeValueArray(&chunk->constants, value);
   return chunk->constants.count - 1;
 }
 
+void writeConstant(Chunk* chunk, Value value, int line) {
+  /**/
+
+}
+
+
 void freeChunk(Chunk* chunk) {
   /*
+  function from book; modified 
   */
-  FREE_ARRAY(uint8_t, chunk->code, chunk->capacity);
-  FREE_ARRAY(int, chunk->lines, chunk->capacity);
+
+  if(!chunk) return;
+
+  uint32_t line_capa; 
+  
+  if(chunk->lineCounter) line_capa= chunk->lineCounter->capacity;
+  else line_capa= 0;
+
+  FREE_ARRAY(uint32_t, chunk->code, chunk->capacity);
+  freeLines(chunk->lineCounter);
   freeValueArray(&chunk->constants);
-  initChunk(chunk);
+
+  initChunk(chunk, line_capa);
 }
