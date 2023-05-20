@@ -7,5 +7,6 @@
 #include <sys/types.h>
 #include "string.h"
 
+#define DEBUG_TRACE_EXECUTION
 
 #endif

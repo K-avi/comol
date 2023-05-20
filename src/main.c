@@ -3,8 +3,11 @@
 #include "debug.h"
 #include "lines.h"
 #include "value.h"
+#include "vm.h"
 
 int main(int argc, const char* argv[]) {
+
+  initVM();
 
   Chunk chunk;
   initChunk(&chunk, 250);
@@ -23,10 +26,16 @@ int main(int argc, const char* argv[]) {
   chunk.constants.values[1]=3;
 
 
-writeChunk(&chunk, OP_RETURN, 207);
+  writeChunk(&chunk, OP_RETURN, 207);
   //linesDump( chunk.lineCounter);
   disassembleChunk(&chunk, "test chunk");
+  
+
+  interpret(&chunk);
+  freeVM();
+  
   freeChunk(&chunk);
   freeLines((chunk.lineCounter));
+  
   return 0;
 }
