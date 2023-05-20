@@ -26,7 +26,7 @@ void initChunk(Chunk* chunk, u_int32_t line_num) {
   initLines(chunk->lineCounter, line_num);
   
   initValueArray(&chunk->constants);
-}
+}//tested
 
 void writeChunk(Chunk* chunk, uint8_t byte, uint32_t instruct_line)  {
   /*
@@ -48,7 +48,7 @@ void writeChunk(Chunk* chunk, uint8_t byte, uint32_t instruct_line)  {
 
   addLine(chunk->lineCounter, instruct_line);
 
-}// not tested
+}// tested; ok when used right
 
 int addConstant(Chunk* chunk, Value value) {
   /*
@@ -59,9 +59,30 @@ int addConstant(Chunk* chunk, Value value) {
 }
 
 void writeConstant(Chunk* chunk, Value value, int line) {
-  /**/
+  /*
+  adds the correct type of constant as a chunk. 
+  adds value first; if it's >= to 256 writes the index of the constant as a 
+  24 bits integer otherwise as an 8 bit one. 
 
-}
+  does so "cleanly" (by calling writechunk)
+  */
+  if(!chunk) return;
+  
+  int constant = addConstant(chunk, value);
+
+  if(constant>=256){
+    writeChunk(chunk, OP_CONSTANT_LONG, line);
+    writeChunk(chunk, (constant>>16)&0xFF, line);
+    writeChunk(chunk, (constant>>8)&0xFF, line);
+    writeChunk(chunk, (constant)&0xFF, line);
+
+  }else{
+    writeChunk(chunk, OP_CONSTANT, line);
+    writeChunk(chunk, constant, line);
+  }
+
+
+}//kinda tested; should be ok
 
 
 void freeChunk(Chunk* chunk) {
@@ -81,4 +102,4 @@ void freeChunk(Chunk* chunk) {
   freeValueArray(&chunk->constants);
 
   initChunk(chunk, line_capa);
-}
+}//reallocates memory for lines so check out for that

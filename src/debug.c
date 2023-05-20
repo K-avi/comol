@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include "chunk.h"
 #include "lines.h"
 #include "value.h"
 #include "debug.h"
@@ -16,13 +17,21 @@ static int simpleInstruction(const char* name, int offset) {
   return offset + 1;
 }
 
-static int constantInstruction(const char* name, Chunk* chunk,
-                               int offset) {
+static int constantInstruction(const char* name, Chunk* chunk, int offset) {
   uint8_t constant = chunk->code[offset + 1];
   printf("%-16s %4d '", name, constant);
   printValue(chunk->constants.values[constant]);
   printf("'\n");
   return offset + 2;
+}
+
+static int longconstantInstruction(const char * name, Chunk * chunk, int offset){
+  uint32_t constant = (chunk->code[offset + 1]<<16 )| (chunk->code[offset+2]<<8) | chunk->code[offset+3];
+  printf("%-16s %4u '", name, constant);
+  printValue(chunk->constants.values[constant]);
+  printf("'\n");
+
+  return offset + 4;
 }
 
 int disassembleInstruction(Chunk* chunk, int offset) {
@@ -37,6 +46,8 @@ int disassembleInstruction(Chunk* chunk, int offset) {
       return simpleInstruction("OP_RETURN", offset);
     case OP_CONSTANT:
       return constantInstruction("OP_CONSTANT", chunk, offset);
+    case OP_CONSTANT_LONG:
+      return longconstantInstruction("OP_LONG", chunk, offset);
     default:
       printf("Unknown opcode %d\n", instruction);
       return offset + 1;

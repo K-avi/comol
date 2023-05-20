@@ -15,6 +15,15 @@ int main(int argc, const char* argv[]) {
 
   writeChunk(&chunk, OP_RETURN, 203);
 
+  writeChunk(&chunk, OP_CONSTANT_LONG, 204);
+  writeChunk(&chunk, 0, 204);
+  writeChunk(&chunk, 0, 204);
+  writeChunk(&chunk, 1, 204);
+  chunk.constants.count++;
+  chunk.constants.values[1]=3;
+
+
+writeChunk(&chunk, OP_RETURN, 207);
   //linesDump( chunk.lineCounter);
   disassembleChunk(&chunk, "test chunk");
   freeChunk(&chunk);
