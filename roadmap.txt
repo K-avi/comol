@@ -1,7 +1,6 @@
 book reading : 
 
-started chapter 15
-15.3
+starting chapter 16.1.1
 
 COMOL design : 
 
@@ -10,6 +9,8 @@ COMOL design :
 
 COMOL implementation :
 
-    not really started tbh
+     I will implement a version of Clox first n then keep the backend of the interpreter and redo 
+     the front-end for COMOL
+
 
 

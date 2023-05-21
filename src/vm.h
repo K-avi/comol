@@ -3,7 +3,7 @@
 
 #include "chunk.h"
 #include "value.h"
-#define STACK_MAX 256 //make it dynamic at some point
+#define STACK_DEFAULT 256 
 
 typedef enum {
   INTERPRET_OK,
@@ -14,7 +14,9 @@ typedef enum {
 typedef struct {
   Chunk* chunk;
   uint8_t* ip;
-  Value stack[STACK_MAX];
+
+  unsigned stack_size;
+  Value* stack;
   Value* stackTop;
 } VM;
 
@@ -25,6 +27,7 @@ InterpretResult interpret(Chunk* chunk);
 
 void push(Value value);
 Value pop();
+extern VM vm;
 
 
 #endif

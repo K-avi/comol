@@ -1,6 +1,12 @@
-This is the repository for the COMOL lanuage and it's interpreter.
-I'm making it while reading the second part of the Crafting Interpreters book by Robert Nystrom ( https://craftinginterpreters.com )
-COMOL will reuse a lot of the code described in this book so please check it out. 
+At the moment, I use this repository to document my reading of 
+the book Crafting Interpreters by Robert Nystrom ( https://craftinginterpreters.com )
+I will also document my ideas for the design of COMOL here. 
+I'll make the repo clean at some point.
+
+When I'm done reading it I will repurpose the C interpreter for Lox to interpret my own 
+language COMOL
+
+COMOL will reuse a lot of the code and concepts described in this book so please check it out. 
 
 I'm making COMOL for fun and to learn more about how to make high level languages. 
 
