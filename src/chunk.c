@@ -9,7 +9,9 @@
 
 void initChunk(Chunk* chunk, u_int32_t line_num) {
    /*
-   function from book ; modified for the lines stuff
+   function from book ; modified for the lines stuff; 
+   the line_num argument makes it possible to init the line counter array ; which is used 
+   to retrieve lines n so on
    */
   if(!chunk) return;
 

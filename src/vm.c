@@ -3,6 +3,7 @@
 #include "memory.h"
 #include "value.h"
 #include "vm.h"
+#include "compiler.h"
 #include "debug.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -113,11 +114,22 @@ static InterpretResult run() {
 #undef BINARY_OP
 }//remember to add long constant support! 
 
-InterpretResult interpret(Chunk* chunk) {
-  /*
-  from book; doesn't check for nullptr
-  */
-  vm.chunk = chunk;
+InterpretResult interpret(const char* source, u_int32_t line_num) {
+  /* book fn; need to modify to make initChunk work n stuff*/
+  Chunk chunk;
+  initChunk(&chunk, line_num);
+
+  if (!compile(source, &chunk)) {
+    freeChunk(&chunk);
+    return INTERPRET_COMPILE_ERROR;
+  }
+
+  vm.chunk = &chunk;
   vm.ip = vm.chunk->code;
-  return run();
+
+  InterpretResult result = run();
+
+  freeChunk(&chunk);
+  return result;
+
 }

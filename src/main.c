@@ -20,7 +20,7 @@ static void repl() {
       break;
     }
 
-    interpret(line);
+    interpret(line, 1);
   }
 }
 
@@ -55,6 +55,8 @@ static char* readFile(const char* path) {
 
 static void runFile(const char* path) {
   char* source = readFile(path);
+  //need to handle line number properly here; to do so I just need to count the number
+  //of \n while reading the file n so on
   InterpretResult result = interpret(source);
   free(source); 
 

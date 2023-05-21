@@ -1,6 +1,6 @@
 book reading : 
 
-starting chapter 16.1.1
+reading through 17.3 
 
 COMOL design : 
 
@@ -14,3 +14,5 @@ COMOL implementation :
 
 
 
+need to make the functions fit the implementation of the line counter n such 
+might change the scanner / parser from custom implem to generate with bison I'm not sure yet

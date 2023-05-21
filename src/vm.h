@@ -23,8 +23,7 @@ typedef struct {
 void initVM();
 void freeVM();
 
-InterpretResult interpret(Chunk* chunk);
-
+InterpretResult interpret(const char* source,  u_int32_t line_num);
 void push(Value value);
 Value pop();
 extern VM vm;
