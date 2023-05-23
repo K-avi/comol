@@ -1,5 +1,6 @@
 #include "chunk.h"
 #include "common.h"
+#include "lines.h"
 #include "memory.h"
 #include "value.h"
 #include "vm.h"
@@ -117,8 +118,11 @@ static InterpretResult run() {
 InterpretResult interpret(const char* source, u_int32_t line_num) {
   /* book fn; need to modify to make initChunk work n stuff*/
   Chunk chunk;
-  initChunk(&chunk, line_num);
+  //chunk.lineCounter=NULL;
 
+  initChunk(&chunk, line_num);
+printf("chunk after init %p %p\n", &chunk, chunk.code);
+  
   if (!compile(source, &chunk)) {
     freeChunk(&chunk);
     return INTERPRET_COMPILE_ERROR;
@@ -129,7 +133,10 @@ InterpretResult interpret(const char* source, u_int32_t line_num) {
 
   InterpretResult result = run();
 
+  
   freeChunk(&chunk);
+  freeLines(chunk.lineCounter); //this looks bad 
+
   return result;
 
 }

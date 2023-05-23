@@ -10,11 +10,20 @@ void initValueArray(ValueArray* array) {
 }
 
 void writeValueArray(ValueArray* array, Value value) {
+
+  //if(!array) return;
+  if(!array){
+    perror("array is null\n");
+  }
+ // printf("writ %p , array-> cap , array -> cou \n", array);
+
   if (array->capacity < array->count + 1) {
     int oldCapacity = array->capacity;
     array->capacity = GROW_CAPACITY(oldCapacity);
     array->values = GROW_ARRAY(Value, array->values, oldCapacity, array->capacity);
   }
+
+  //printf("newvals array : %p , array-> cap %d, array -> cou %d\n", array, array->capacity, array->count);
 
   array->values[array->count] = value;
   array->count++;

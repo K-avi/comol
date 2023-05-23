@@ -36,6 +36,7 @@ typedef struct {
 void initChunk(Chunk* chunk, uint32_t line_num);
 void freeChunk(Chunk* chunk);
 void writeChunk(Chunk* chunk, uint8_t byte, uint32_t line) ;
+void writeConstant(Chunk* chunk, Value value, int line);
 int addConstant(Chunk* chunk, Value value);
 
 #endif

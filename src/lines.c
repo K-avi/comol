@@ -69,9 +69,16 @@ int getLine( Lines* lineCounter, unsigned instruct_index){
 
     checks for nullptr
     */
-    if(! lineCounter) return -1;
-    if(!lineCounter->lines) return -1;
 
+    if(! lineCounter) {
+        fprintf(stderr,"nullptr caught in getLine\n");
+        return -1;
+    }
+    if(!lineCounter->lines) {
+        fprintf(stderr,"nullptr caught in getLine\n");
+        return -1;
+    }
+    
     int l = 0, r =lineCounter->capacity-1;
 //printf("wth\n");
     while (l <= r){
@@ -86,7 +93,7 @@ int getLine( Lines* lineCounter, unsigned instruct_index){
 
         //last line case 
         if((uint32_t) m==lineCounter->capacity-1 && (instruct_index > lineCounter->lines[m]) ){
-          //  printf("exit path 1\n");
+          printf("exit path 1 m %d  capa %d ii %d ll %d\n", m, lineCounter->capacity, instruct_index, lineCounter->lines[m]);
             return -1;
         }else if( (uint32_t) m==lineCounter->capacity-1){
             // printf("exit path i forgor\n");
@@ -124,7 +131,7 @@ int getLine( Lines* lineCounter, unsigned instruct_index){
 
        //printf("l=%d r=%d m=%d\n",l, r,m);
     }
-    //printf("exit path 5\n");
+    printf("exit path 5\n");
     return -1;
 }// tested; doesnt work for some reason
 

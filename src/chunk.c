@@ -3,6 +3,7 @@
 #include "memory.h"
 
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
 
@@ -18,6 +19,10 @@ void initChunk(Chunk* chunk, u_int32_t line_num) {
   chunk->count = 0;
   chunk->capacity = 0;
   chunk->code = NULL;
+
+  if(chunk->lineCounter){
+   // freeLines(chunk->lineCounter);
+  }
   
   chunk->lineCounter= (Lines* )malloc(sizeof(Lines));
   
@@ -47,7 +52,7 @@ void writeChunk(Chunk* chunk, uint8_t byte, uint32_t instruct_line)  {
 
   chunk->code[chunk->count] = byte;
   chunk->count++;
-
+printf("in chunk instructline %u\n", instruct_line);
   addLine(chunk->lineCounter, instruct_line);
 
 }// tested; ok when used right
@@ -56,6 +61,11 @@ int addConstant(Chunk* chunk, Value value) {
   /*
   function from book
   */
+  /*if(!chunk){
+     fprintf(stderr,"nullptr caught in addConstant at %p , %f\n", &addConstant, value); 
+     return -1;
+  }*/
+
   writeValueArray(&chunk->constants, value);
   return chunk->constants.count - 1;
 }
@@ -68,8 +78,11 @@ void writeConstant(Chunk* chunk, Value value, int line) {
 
   does so "cleanly" (by calling writechunk)
   */
-  if(!chunk) return;
-  
+ /* if(!chunk) {
+   fprintf(stderr,"nullptr caught in writeConstant at %p\n", (void*) &writeConstant); 
+   return;
+  }*/
+ 
   int constant = addConstant(chunk, value);
 
   if(constant>=256){

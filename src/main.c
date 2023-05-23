@@ -55,9 +55,14 @@ static char* readFile(const char* path) {
 
 static void runFile(const char* path) {
   char* source = readFile(path);
-  //need to handle line number properly here; to do so I just need to count the number
-  //of \n while reading the file n so on
-  InterpretResult result = interpret(source);
+
+  unsigned linenum=0, i=0;
+
+  while(source[i]){//awful but eh it works ig
+    if(source[i++]=='\n') linenum++; 
+  }
+
+  InterpretResult result = interpret(source, linenum);
   free(source); 
 
   if (result == INTERPRET_COMPILE_ERROR) exit(65);

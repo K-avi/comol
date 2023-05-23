@@ -4,11 +4,11 @@ CC := gcc
 CFLAGS := -O2  -g -Wall -Wextra -Wpedantic -Wno-unused-parameter
 
 
-SRCS := debug.c chunk.c memory.c value.c lines.c vm.c
+SRCS := *.c
 
 all: $(TARGET)
 
-$(TARGET): $(SRCS) main.c
+$(TARGET): $(SRCS) 
 	$(CC) $(CFLAGS) $^ -o $(TARGET) $(CLIBS)
 
 
