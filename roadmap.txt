@@ -1,6 +1,6 @@
 book reading : 
 
-reading through 17.5
+finished chap 17 
 
 COMOL design : 
 
@@ -13,9 +13,6 @@ COMOL implementation :
      the front-end for COMOL
 
 
-
-
-will have to get the globals outta here cuz they annoy me ; will do that after I'm done w chap 17
-
+might be an issue w linecounter
 need to make the functions fit the implementation of the line counter n such 
 might change the scanner / parser from custom implem to generate with bison I'm not sure yet

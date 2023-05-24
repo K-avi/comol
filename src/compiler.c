@@ -33,7 +33,7 @@ typedef enum {
   PREC_PRIMARY
 } Precedence;
 
-typedef void (*ParseFn)();
+typedef void (*ParseFn)(Scanner * scanner);
 
 typedef struct {
   ParseFn prefix;
@@ -81,24 +81,24 @@ static void errorAtCurrent(const char* message) {
 }
 
 
-static void advance() {
+static void advanceParser(Scanner * scanner) {
     /*book fn*/
   parser.previous = parser.current;
 
   for (;;) {
-    parser.current = scanToken();
+    parser.current = scanToken(scanner);
     if (parser.current.type != TOKEN_ERROR) break;
 
     errorAtCurrent(parser.current.start);
   }
 }
 
-static void consume(TokenType type, const char* message) {
+static void consume(TokenType type, const char* message, Scanner * scanner) {
     /* 
     book fn
     */
   if (parser.current.type == type) {
-    advance();
+    advanceParser(scanner);
     return;
   }
 
@@ -128,32 +128,32 @@ static void endCompiler() {
 //declare before cuz parser is recursive and so on
 static void expression();
 static ParseRule* getRule(TokenType type);
-static void parsePrecedence(Precedence precedence);
+static void parsePrecedence(Precedence precedence, Scanner* scanner);
 
-static void parsePrecedence(Precedence precedence) {
-  // 
-  advance();
+static void parsePrecedence(Precedence precedence,Scanner* scanner) {
+  // really need to understand this 
+  advanceParser(scanner);
   ParseFn prefixRule = getRule(parser.previous.type)->prefix;
   if (prefixRule == NULL) {
     error("Expect expression.");
     return;
   }
 
-  prefixRule();
+  prefixRule(scanner);
 
 
   while (precedence <= getRule(parser.current.type)->precedence) {
-    advance();
+    advanceParser(scanner);
     ParseFn infixRule = getRule(parser.previous.type)->infix;
-    infixRule();
+    infixRule(scanner);
   }
 }
 
 
-static void binary() {
+static void binary(Scanner * scanner) {
   TokenType operatorType = parser.previous.type;
   ParseRule* rule = getRule(operatorType);
-  parsePrecedence((Precedence)(rule->precedence + 1));
+  parsePrecedence((Precedence)(rule->precedence + 1), scanner);
 
   switch (operatorType) {
     case TOKEN_PLUS:          emitByte(OP_ADD); break;
@@ -164,26 +164,26 @@ static void binary() {
   }
 }
 
-static void expression() {
+static void expression(Scanner * scanner) {
   // W
-  parsePrecedence(PREC_ASSIGNMENT);
+  parsePrecedence(PREC_ASSIGNMENT, scanner);
 }
 
 
-static void grouping() {
-  expression();
-  consume(TOKEN_RIGHT_PAREN, "Expect ')' after expression.");
+static void grouping(Scanner * scanner) {
+  expression(scanner);
+  consume(TOKEN_RIGHT_PAREN, "Expect ')' after expression.", scanner);
 }
 
 
-
+/*
 static void emitBytes(uint8_t byte1, uint8_t byte2) {
   emitByte(byte1);
   emitByte(byte2);
 }
+*/
 
-
-
+/*
 static uint8_t makeConstant(Value value) {
   int constant = addConstant(currentChunk(), value);
   if (constant > UINT8_MAX) {
@@ -193,7 +193,7 @@ static uint8_t makeConstant(Value value) {
 
   return (uint8_t)constant;
 }//longconstant !!!
-
+*/
 /*
 static void emitConstant(Value value) {
   //book fn
@@ -201,7 +201,7 @@ static void emitConstant(Value value) {
 }
 */
 
-static void number() {
+static void number(Scanner* scanner) {
   double value = strtod(parser.previous.start, NULL);
   //emitConstant(value);
 
@@ -211,11 +211,11 @@ static void number() {
 
 
 
-static void unary() {
+static void unary(Scanner* scanner) {
   TokenType operatorType = parser.previous.type;
 
   // Compile the operand.
-    parsePrecedence(PREC_UNARY);
+    parsePrecedence(PREC_UNARY, scanner);
 
   // Emit the operator instruction.
   switch (operatorType) {
@@ -282,15 +282,17 @@ bool compile(const char* source, Chunk* chunk){
   if(! (source &&chunk)){
     fprintf(stderr,"caught null chunk or source in compile at %p , source is %p, chunk is %p\n",(void*) &compile, (void*)&source, (void*) &chunk);
   }
-  initScanner(source);
+  Scanner scanner;
+  initScanner(source, &scanner);
+  
   compilingChunk = chunk;
 
   parser.hadError = false;
   parser.panicMode = false;
 
-  advance();
-  expression();
-  consume(TOKEN_EOF, "Expect end of expression.");
+  advanceParser(&scanner);
+  expression(&scanner);
+  consume(TOKEN_EOF, "Expect end of expression.", &scanner);
 
    endCompiler();
   return !parser.hadError;
