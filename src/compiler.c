@@ -32,17 +32,17 @@ typedef enum {
   PREC_CALL,        // . ()
   PREC_PRIMARY
 } Precedence;
+//precedence of operators enum; 
+//allows to know which one to write when on the bytecode and so on
 
-typedef void (*ParseFn)(Scanner * scanner);
+typedef void (*ParseFn)(Scanner * scanner, Parser *parser); //watch out for this it's an easy source of mistakes
 
 typedef struct {
   ParseFn prefix;
   ParseFn infix;
   Precedence precedence;
 } ParseRule;
-
-Parser parser;
-
+//parser rule table for diferent operators
 
 Chunk* compilingChunk; //oh hell no not the global compilingChunk 
 
@@ -50,10 +50,14 @@ static Chunk* currentChunk() {
   return compilingChunk;
 }
 
-static void errorAt(Token* token, const char* message) {
-    /*book fn*/
-  if (parser.panicMode) return;
-  parser.panicMode = true;
+static void errorAt(Token* token, const char* message, Parser * parser) {
+    /*error reporting function ; 
+    sets the parser into panic mode; 
+    prints the line where the error occured on stderr W an error messages
+
+    */
+  if (parser->panicMode) return;
+  parser->panicMode = true;
   fprintf(stderr, "[line %d] Error", token->line);
 
   if (token->type == TOKEN_EOF) {
@@ -65,61 +69,71 @@ static void errorAt(Token* token, const char* message) {
   }
 
   fprintf(stderr, ": %s\n", message);
-  parser.hadError = true;
+  parser->hadError = true;
 }
 
 
-static void error(const char* message) {
-    /*book fn*/
-  errorAt(&parser.previous, message);
+static void error(const char* message, Parser * parser) {
+    /*see error at*/
+  errorAt(&parser->previous, message, parser);
 }
 
 
-static void errorAtCurrent(const char* message) {
-    /*book fn*/
-  errorAt(&parser.current, message);
+static void errorAtCurrent(const char* message, Parser * parser) {
+    /*see error at book fn*/
+  errorAt(&parser->current, message, parser);
 }
 
 
-static void advanceParser(Scanner * scanner) {
-    /*book fn*/
-  parser.previous = parser.current;
+static void advanceParser(Scanner * scanner, Parser* parser) {
+    /*book fn
+    advances token being consumes  
+    asks the scanner to generate a new token and breaks ; 
+
+    reports an error if one is found
+    
+    */
+  parser->previous = parser->current;
 
   for (;;) {
-    parser.current = scanToken(scanner);
-    if (parser.current.type != TOKEN_ERROR) break;
+    parser->current = scanToken(scanner);
+    if (parser->current.type != TOKEN_ERROR) break;
 
-    errorAtCurrent(parser.current.start);
+    errorAtCurrent(parser->current.start, parser);
   }
 }
 
-static void consume(TokenType type, const char* message, Scanner * scanner) {
+static void consume(TokenType type, const char* message, Scanner * scanner ,Parser * parser) {
     /* 
     book fn
+    consumes a token of an expected type ; reports an error if one is found
     */
-  if (parser.current.type == type) {
-    advanceParser(scanner);
+  if (parser->current.type == type) {
+    advanceParser(scanner, parser);
     return;
   }
 
-  errorAtCurrent(message);
+  errorAtCurrent(message, parser);
 }
 
-static void emitByte(uint8_t byte) {
-  writeChunk(currentChunk(), byte, parser.previous.line);
+static void emitByte(uint8_t byte, Parser * parser) {
+  /*
+  writes a single byte in the current chunk at the current line
+  */
+  writeChunk(currentChunk(), byte, parser->current.line);
 }
 
-static void emitReturn() {
-  emitByte(OP_RETURN);
+static void emitReturn(Parser *parser) {
+  emitByte(OP_RETURN, parser);
 }
 
 
 
 
-static void endCompiler() {
-  emitReturn();
+static void endCompiler(Parser * parser) {
+  emitReturn(parser);
   #ifdef DEBUG_PRINT_CODE
-  if (!parser.hadError) {
+  if (!parser->hadError) {
     disassembleChunk(currentChunk(), "code");
   }
 #endif
@@ -128,51 +142,76 @@ static void endCompiler() {
 //declare before cuz parser is recursive and so on
 static void expression();
 static ParseRule* getRule(TokenType type);
-static void parsePrecedence(Precedence precedence, Scanner* scanner);
+static void parsePrecedence(Precedence precedence, Scanner* scanner, Parser * parser);
 
-static void parsePrecedence(Precedence precedence,Scanner* scanner) {
+static void parsePrecedence(Precedence precedence,Scanner* scanner, Parser *parser) {
   // really need to understand this 
-  advanceParser(scanner);
-  ParseFn prefixRule = getRule(parser.previous.type)->prefix;
+
+  /*
+  advances the parser ; sees if it can parse a prefix rule . 
+  reports an error if it can't. 
+
+  On succes; parses it.
+
+  then enters a while loop to parse the infix expressions that the expression 
+  being scanned is a part of 
+
+  this allows to write the infix expression in correct order (somehow)
+  */
+  advanceParser(scanner, parser);
+  ParseFn prefixRule = getRule(parser->previous.type)->prefix;
   if (prefixRule == NULL) {
-    error("Expect expression.");
+    error("Expect expression.", parser);
     return;
   }
 
-  prefixRule(scanner);
+  prefixRule(scanner, parser);
 
 
-  while (precedence <= getRule(parser.current.type)->precedence) {
-    advanceParser(scanner);
-    ParseFn infixRule = getRule(parser.previous.type)->infix;
-    infixRule(scanner);
+  while (precedence <= getRule(parser->current.type)->precedence) {
+    advanceParser(scanner, parser);
+    ParseFn infixRule = getRule(parser->previous.type)->infix;
+    infixRule(scanner, parser);
   }
-}
+}//need to understand better!!!
 
 
-static void binary(Scanner * scanner) {
-  TokenType operatorType = parser.previous.type;
+static void binary(Scanner * scanner, Parser* parser) {
+  /*
+  defines the rule to parse a binary op.
+
+  first retrieves the operator from the parser 
+
+  retrieves the function ptr to it's rule from the rule table 
+  calls parse precedence 
+
+  and writes the bytecode of the operation
+  */
+  TokenType operatorType = parser->previous.type;
   ParseRule* rule = getRule(operatorType);
-  parsePrecedence((Precedence)(rule->precedence + 1), scanner);
+  parsePrecedence((Precedence)(rule->precedence + 1), scanner, parser);
 
   switch (operatorType) {
-    case TOKEN_PLUS:          emitByte(OP_ADD); break;
-    case TOKEN_MINUS:         emitByte(OP_SUBTRACT); break;
-    case TOKEN_STAR:          emitByte(OP_MULTIPLY); break;
-    case TOKEN_SLASH:         emitByte(OP_DIVIDE); break;
+    case TOKEN_PLUS:          emitByte(OP_ADD, parser); break;
+    case TOKEN_MINUS:         emitByte(OP_SUBTRACT , parser); break;
+    case TOKEN_STAR:          emitByte(OP_MULTIPLY, parser); break;
+    case TOKEN_SLASH:         emitByte(OP_DIVIDE , parser); break;
     default: return; // Unreachable.
   }
 }
 
-static void expression(Scanner * scanner) {
-  // W
-  parsePrecedence(PREC_ASSIGNMENT, scanner);
+static void expression(Scanner * scanner, Parser* parser) {
+  // rule to parse an expression
+  parsePrecedence(PREC_ASSIGNMENT, scanner, parser);
 }
 
 
-static void grouping(Scanner * scanner) {
-  expression(scanner);
-  consume(TOKEN_RIGHT_PAREN, "Expect ')' after expression.", scanner);
+static void grouping(Scanner * scanner, Parser * parser) {
+  /*
+  rule to parse a grouping expression
+  */
+  expression(scanner, parser);
+  consume(TOKEN_RIGHT_PAREN, "Expect ')' after expression.", scanner, parser);
 }
 
 
@@ -201,25 +240,32 @@ static void emitConstant(Value value) {
 }
 */
 
-static void number(Scanner* scanner) {
-  double value = strtod(parser.previous.start, NULL);
+static void number(Scanner* scanner, Parser * parser) {
+  /*
+  rule to parse a number litteral
+  */
+  double value = strtod(parser->previous.start, NULL);
   //emitConstant(value);
 
-  printf("prevline %d\n", parser.previous.line);
-  writeConstant(currentChunk(), value, parser.previous.line); //using custom writeConstant fn
+ // printf("prevline %d\n", parser.previous.line);
+  writeConstant(currentChunk(), value, parser->previous.line); //using custom writeConstant fn
 }
 
 
 
-static void unary(Scanner* scanner) {
-  TokenType operatorType = parser.previous.type;
+static void unary(Scanner* scanner , Parser * parser) {
+  /*
+  rule to parse an unary expression 
+  (prefix minus or negation)
+  */
+  TokenType operatorType = parser->previous.type;
 
   // Compile the operand.
-    parsePrecedence(PREC_UNARY, scanner);
+    parsePrecedence(PREC_UNARY, scanner, parser);
 
   // Emit the operator instruction.
   switch (operatorType) {
-    case TOKEN_MINUS: emitByte(OP_NEGATE); break;
+    case TOKEN_MINUS: emitByte(OP_NEGATE, parser); break;
     default: return; // Unreachable.
   }
 }
@@ -270,7 +316,22 @@ ParseRule rules[] = {
 
 
 static ParseRule* getRule(TokenType type) {
+  /*
+  retrieves the function pointer of the rule corresponding to a token type from the rules table constant
+  */
   return &rules[type];
+}
+
+void initParser(Parser * parser){
+  /*
+  initialises a non null parser 
+  */
+  if(!parser) return;
+
+  parser->current=(Token ){ 0, NULL, 0,0};
+  parser->previous= (Token ){ 0, NULL, 0,0};
+  parser->hadError=false;
+  parser->panicMode=false;
 }
 
 bool compile(const char* source, Chunk* chunk){
@@ -279,21 +340,24 @@ bool compile(const char* source, Chunk* chunk){
   */
 
  //printf("in compile source %p , chunk %p\n", (void*)source, (void*) chunk);
-  if(! (source &&chunk)){
+  if(! (source && chunk)){
     fprintf(stderr,"caught null chunk or source in compile at %p , source is %p, chunk is %p\n",(void*) &compile, (void*)&source, (void*) &chunk);
   }
   Scanner scanner;
   initScanner(source, &scanner);
-  
+
   compilingChunk = chunk;
+  
+  
+  
+  Parser parser; 
+  initParser(&parser);
+ 
 
-  parser.hadError = false;
-  parser.panicMode = false;
+  advanceParser(&scanner, &parser);
+  expression(&scanner , &parser);
+  consume(TOKEN_EOF, "Expect end of expression.", &scanner, &parser);
 
-  advanceParser(&scanner);
-  expression(&scanner);
-  consume(TOKEN_EOF, "Expect end of expression.", &scanner);
-
-   endCompiler();
+  endCompiler(&parser);
   return !parser.hadError;
 }
