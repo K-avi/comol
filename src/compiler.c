@@ -200,6 +200,26 @@ static void binary(Scanner * scanner, Parser* parser) {
   }
 }
 
+
+/*
+
+would have to use 
+static void ternary(Scanner * scanner, Parser* parser) {
+  
+  test for ternary op from challenges ; prolly won't be used
+  
+  TokenType operatorType = parser->previous.type;
+  ParseRule* rule = getRule(operatorType);
+  parsePrecedence((Precedence)(rule->precedence + 1), scanner, parser);
+ parsePrecedence((Precedence)(rule->precedence + 1), scanner, parser);
+  switch (operatorType) {
+    case TOKEN_QMARK: emitByte( OP_QMARK, parser); break;
+
+    default: return; // Unreachable.
+  }
+}
+*/
+
 static void expression(Scanner * scanner, Parser* parser) {
   // rule to parse an expression
   parsePrecedence(PREC_ASSIGNMENT, scanner, parser);
