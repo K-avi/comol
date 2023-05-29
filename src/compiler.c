@@ -268,7 +268,7 @@ static void number(Scanner* scanner, Parser * parser) {
   //emitConstant(value);
 
  // printf("prevline %d\n", parser.previous.line);
-  writeConstant(currentChunk(), value, parser->previous.line); //using custom writeConstant fn
+  writeConstant(currentChunk(), NUMBER_VAL(value), parser->previous.line); //using custom writeConstant fn
 }
 
 

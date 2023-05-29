@@ -14,6 +14,7 @@ void writeValueArray(ValueArray* array, Value value) {
   //if(!array) return;
   if(!array){
     perror("array is null\n");
+    return;
   }
  // printf("writ %p , array-> cap , array -> cou \n", array);
 
@@ -35,5 +36,5 @@ void freeValueArray(ValueArray* array) {
 }
 
 void printValue(Value value) {
-  printf("%g", value);
+  printf("%g", AS_NUMBER(value));
 }

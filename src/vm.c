@@ -6,6 +6,8 @@
 #include "vm.h"
 #include "compiler.h"
 #include "debug.h"
+
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -16,8 +18,25 @@ static void resetStack() {
   vm.stackTop = vm.stack;
 }
 
-void initVM() {
+static void runtimeError(const char* format, ...) {
+  /*
+  
+  */
+  va_list args;
+  va_start(args, format);
+  vfprintf(stderr, format, args);
+  va_end(args);
+  fputs("\n", stderr);
 
+  size_t instruction = vm.ip - vm.chunk->code - 1;
+  int line = getLine(vm.chunk->lineCounter, instruction); //call to custom linecounter
+  fprintf(stderr, "[line %d] in script\n", line);
+  resetStack();
+}
+
+void initVM() {
+  /*
+  */
     if(!vm.stack){
       vm.stack= malloc(STACK_DEFAULT*sizeof(Value));
     }
@@ -47,6 +66,10 @@ void push(Value value) {
 Value pop() {
   vm.stackTop--;
   return *vm.stackTop;
+}
+
+static Value peekVM(int distance) {
+  return vm.stackTop[-1 - distance];
 }
 
 static InterpretResult run() {
@@ -95,7 +118,14 @@ static InterpretResult run() {
         break;
       }
 
-      case OP_NEGATE:  *(vm.stackTop-1)= -*(vm.stackTop-1); break;
+      case OP_NEGATE: 
+        if (!IS_NUMBER(peekVM(0))) {
+            runtimeError("Operand must be a number.");
+            return INTERPRET_RUNTIME_ERROR;
+          }
+          push(NUMBER_VAL(-AS_NUMBER(pop())));
+      break;
+
 
       case OP_ADD:      BINARY_OP(+); break;
       case OP_SUBTRACT: BINARY_OP(-); break;
