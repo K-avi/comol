@@ -145,6 +145,7 @@ static TokenType identifierType(Scanner * scanner) {
     case 'p': return checkKeyword(1, 4, "rint", TOKEN_PRINT, scanner);
     case 'r': return checkKeyword(1, 5, "eturn", TOKEN_RETURN, scanner);
     case 's': return checkKeyword(1, 4, "uper", TOKEN_SUPER, scanner);
+    case 't': return checkKeyword(1, 3, "rue", TOKEN_TRUE, scanner);
     case 'v': return checkKeyword(1, 2, "ar", TOKEN_VAR, scanner);
     case 'w': return checkKeyword(1, 4, "hile", TOKEN_WHILE, scanner);
     case 'f':

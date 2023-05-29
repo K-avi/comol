@@ -11,6 +11,16 @@ typedef enum {
   OP_CONSTANT,
   OP_CONSTANT_LONG,
 
+  OP_NIL,
+  OP_TRUE,
+  OP_FALSE,
+
+  OP_NOT,
+
+  OP_EQUAL,
+  OP_GREATER,
+  OP_LESS,
+
   OP_RETURN,
   OP_NEGATE,
   
