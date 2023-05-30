@@ -1,6 +1,13 @@
+I probably won't update the repo much in the next 3 months since my intern
+started.  
+
+I will try to keep on reading Crafting Interpreters a bit and keep
+on working on COMOL's design
+
+
 book reading : 
 
-19
+19.3
 
 COMOL design : 
 
